@@ -8,16 +8,7 @@ dataset_path = "/app/tom_and_jerry_training_dataset"
 dataset_testing_path = "/app/tom_and_jerry_testing_dataset"
 
 
-# Load dataset
-train_dataset = tf.keras.preprocessing.image_dataset_from_directory(
-    dataset_path,
-    image_size=(64, 64),  # Resize images to a reasonable size
-    batch_size= 64, # Since we only have 5000 images, we can afford a small batch size
-    label_mode="int"  # Can be "categorical" or None if you don’t have labels
-)
 
-normalization_layer = tf.keras.layers.Rescaling(1./255)
-train_dataset = train_dataset.map(lambda x, y: (normalization_layer(x), y))
 
 # train_dataset = train_dataset.shuffle(1000).prefetch(buffer_size=tf.data.AUTOTUNE)
 
@@ -25,12 +16,6 @@ train_dataset = train_dataset.map(lambda x, y: (normalization_layer(x), y))
 # Define train-validation split
 train_size = 0.8  # 80% training, 20% validation
 val_size = 1 - train_size
-
-# Get total number of batches
-total_batches = len(train_dataset)
-
-# Calculate number of training batches
-train_batches = int(total_batches * train_size)
 
 # Split dataset
 #train_dataset = train_dataset.take(train_batches)
@@ -43,7 +28,19 @@ train_dataset = tf.keras.preprocessing.image_dataset_from_directory(
     subset="training",
     seed=123  # Ensures consistent split
 )
+normalization_layer = tf.keras.layers.Rescaling(1./255)
+train_dataset = train_dataset.map(lambda x, y: (normalization_layer(x), y))
 
+for data, label in train_dataset.take(5):
+    print("Features shape:", data.shape)
+    print("Labels shape:", label.shape)
+    print("First Image Data:\n", data.numpy()[0])  # First sample's pixel values
+    print("First Label:\n", label.numpy()[0])  # First label
+    print("Min Pixel Value:", np.min(data.numpy()))
+    print("Max Pixel Value:", np.max(data.numpy()))    
+    
+
+    
 val_dataset = tf.keras.preprocessing.image_dataset_from_directory(
     dataset_path,
     image_size=(64, 64),
@@ -54,6 +51,12 @@ val_dataset = tf.keras.preprocessing.image_dataset_from_directory(
 )
 #val_dataset = train_dataset.skip(train_batches)
 
+
+# Get total number of batches
+total_batches = len(train_dataset)
+
+# Calculate number of training batches
+train_batches = int(total_batches * train_size)
 
 
 
