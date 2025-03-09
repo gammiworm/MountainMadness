@@ -91,7 +91,7 @@ print(f"Validation Accuracy: {val_acc:.2f}")
 
 model.save("tom_and_jerry_classifier.h5")
 
-def predict_image(img_path, model):
+def predict_single_image(img_path, model):
     img = tf.keras.preprocessing.image.load_img(img_path, target_size=(64, 64))
     img_array = tf.keras.preprocessing.image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
@@ -100,9 +100,9 @@ def predict_image(img_path, model):
     prediction = model.predict(img_array)
     predicted_class = np.argmax(prediction)  # Get index of max probability
 
-    class_names = ["Tom", "Jerry", "Class3", "Class4"]  # Update with your class names
+    class_names = ["Tom", "Jerry", "Both", "Neither"]  # Update with your class names
     return class_names[predicted_class]  # Return the predicted class label
 
 model = keras.models.load_model("tom_and_jerry_classifier.h5")
-print(predict_image("test_image.jpg", model))
+print(predict_single_image("test_image.jpg", model))
 
