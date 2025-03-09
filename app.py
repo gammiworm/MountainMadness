@@ -17,10 +17,10 @@ class_names = ['Tom', 'Jerry', 'Both', 'Neither']
 # Build CNN model
 array = [
         layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
-        layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(64, (3, 3), activation='relu'),
+        # layers.MaxPooling2D((2, 2)),
+        # layers.Conv2D(64, (3, 3), activation='relu'),
         layers.Flatten(),
-        layers.Dense(64, activation='relu'),
+        # layers.Dense(64, activation='relu'),
         layers.Dense(10, activation='softmax')
         ]
 
@@ -40,7 +40,7 @@ while True:
     print(f'\nTest accuracy: {test_acc:.4f}')
 
     filter = newFilter()
-    index = len(array) - 4
+    index = len(array) - 2
     array.insert(index, filter)
 
 
