@@ -65,15 +65,11 @@ class_names = ['tom', 'jerry', 'both', 'neither']
 model = keras.Sequential([
         keras.Input(shape=(64, 64, 3)),  # Define input explicitly
         layers.Conv2D(32, (3, 3), activation='relu'),
-
-        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
         layers.MaxPooling2D(2, 2),  # Reduce size
-
-        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
-        layers.MaxPooling2D(2, 2),  # Reduce size
-        layers.Flatten(),
-        layers.Dense(64, activation='relu'),
-        layers.Dropout(0.5),  # Helps prevent overfitting
+        layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
+        layers.GlobalAveragePooling2D(),
+        #layers.Dense(64, activation='relu'),
+        #layers.Dropout(0.5),  # Helps prevent overfitting
         layers.Dense(4, activation='softmax')
 ])
 
@@ -85,7 +81,7 @@ model.compile(optimizer='adam',
 model.summary()
 
 # Train the model
-history = model.fit(train_dataset, validation_data=val_dataset, epochs=2)
+history = model.fit(train_dataset, validation_data=val_dataset, epochs=5)
 
 # Evaluate the model
 val_loss, val_acc = model.evaluate(val_dataset)
@@ -111,9 +107,12 @@ def predict_images_in_directory(directory_path, model):
 
     # Loop through all image files in the directory
     for subdirectory in os.listdir(directory_path):
+     
+    # Ensure it's a directory before listing files            
         subdirectory_path = os.path.join(directory_path, subdirectory)
         for filename in os.listdir(subdirectory_path):
             file_path = os.path.join(subdirectory_path, filename)
+
 
             try:
                 # Load and preprocess image
