@@ -111,9 +111,9 @@ def predict_images_in_directory(directory_path, model):
 
     # Loop through all image files in the directory
     for subdirectory in os.listdir(directory_path):
-        
-        for filename in os.listdir(subdirectory):
-            file_path = os.path.join(directory_path,subdirectory,filename)
+        subdirectory_path = os.path.join(directory_path, subdirectory)
+        for filename in os.listdir(subdirectory_path):
+            file_path = os.path.join(subdirectory_path, filename)
 
             try:
                 # Load and preprocess image
