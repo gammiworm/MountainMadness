@@ -11,7 +11,7 @@ import numpy as np
 x_train, x_test = x_train / 255.0, x_test / 255.0
 
 # Define class names
-class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+class_names = ['Tom', 'Jerry', 'Both', 'Neither']
 
 # Build CNN model
 model = keras.Sequential([
