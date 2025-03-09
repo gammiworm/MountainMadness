@@ -13,6 +13,7 @@ ENV PATH="/opt/conda/envs/$ENV_NAME/bin:$PATH"
 # Ensure Conda is using the correct environment
 RUN echo "source activate $ENV_NAME" > ~/.bashrc
 RUN pip install --upgrade tensorflow
+
 SHELL ["/bin/bash", "-c"]
 
 COPY . .
