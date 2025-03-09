@@ -64,7 +64,7 @@ class_names = ['tom', 'jerry', 'both', 'neither']
 
 model = keras.Sequential([
         keras.Input(shape=(64, 64, 3)),  # Define input explicitly
-        layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
+        layers.Conv2D(32, (3, 3), activation='relu'),
 
         layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
         layers.MaxPooling2D(2, 2),  # Reduce size
@@ -111,7 +111,8 @@ def predict_images_in_directory(directory_path, model):
 
     # Loop through all image files in the directory
     for subdirectory in os.listdir(directory_path):
-        for filename in subdirectory:
+        
+        for filename in os.listdir(subdirectory):
             file_path = os.path.join(directory_path,subdirectory,filename)
 
             try:
