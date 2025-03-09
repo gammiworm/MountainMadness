@@ -1,55 +1,108 @@
 import tensorflow as tf
 from tensorflow import keras
 layers = tf.keras.layers
-import matplotlib.pyplot as plt
 import numpy as np
-from iteration.py import newFilter
 
-# Load CIFAR-10 dataset
-(x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
-# Normalize pixel values to be between 0 and 1
-x_train, x_test = x_train / 255.0, x_test / 255.0
+dataset_path = "/app/tom_and_jerry_training_dataset"
+
+# Load dataset
+train_dataset = tf.keras.preprocessing.image_dataset_from_directory(
+    dataset_path,
+    image_size=(64, 64),  # Resize images to a reasonable size
+    batch_size= 64, # Since we only have 5000 images, we can afford a small batch size
+    label_mode="int"  # Can be "categorical" or None if you don’t have labels
+)
+
+normalization_layer = tf.keras.layers.Rescaling(1./255)
+train_dataset = train_dataset.map(lambda x, y: (normalization_layer(x), y))
+
+# train_dataset = train_dataset.shuffle(1000).prefetch(buffer_size=tf.data.AUTOTUNE)
+
+
+# Define train-validation split
+train_size = 0.8  # 80% training, 20% validation
+val_size = 1 - train_size
+
+# Get total number of batches
+total_batches = len(train_dataset)
+
+# Calculate number of training batches
+train_batches = int(total_batches * train_size)
+
+# Split dataset
+#train_dataset = train_dataset.take(train_batches)
+
+train_dataset = tf.keras.preprocessing.image_dataset_from_directory(
+    dataset_path,
+    image_size=(64, 64),
+    batch_size=64,
+    validation_split=0.2,  # Use 20% for validation
+    subset="training",
+    seed=123  # Ensures consistent split
+)
+
+val_dataset = tf.keras.preprocessing.image_dataset_from_directory(
+    dataset_path,
+    image_size=(64, 64),
+    batch_size=64,
+    validation_split=0.2,  # Use same split
+    subset="validation",
+    seed=123
+)
+#val_dataset = train_dataset.skip(train_batches)
+
+
+
+
 # Define class names
 class_names = ['tom', 'jerry', 'both', 'neither']
 
 # Build CNN model
-array = [
+
+model = keras.Sequential([
+        keras.Input(shape=(64, 64, 3)),  # Define input explicitly
+
         layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
-        #layers.MaxPooling2D((2, 2)),
-        #layers.Conv2D(64, (3, 3), activation='relu'),
+
+        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+        layers.MaxPooling2D(2, 2),  # Reduce size
+
+        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+        layers.MaxPooling2D(2, 2),  # Reduce size
         layers.Flatten(),
-        # layers.Dense(64, activation='relu'),
+        layers.Dense(64, activation='relu'),
+        layers.Dropout(0.5),  # Helps prevent overfitting
         layers.Dense(4, activation='softmax')
-        ]
+])
 
-while True:
-    model = keras.Sequential(array)
+# Compile the model
+model.compile(optimizer='adam',
+            loss='sparse_categorical_crossentropy',
+            metrics=['accuracy'])
 
-    # Compile the model
-    model.compile(optimizer='adam',
-                loss='sparse_categorical_crossentropy',
-                metrics=['accuracy'])
+model.summary()
 
-    # Train the model
-    history = model.fit(x_train, y_train, epochs=10, validation_data=(x_test, y_test))
+# Train the model
+history = model.fit(train_dataset, validation_data=val_dataset, epochs=2)
 
-    # Evaluate the model
-    test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)
-    print(f'\nTest accuracy: {test_acc:.4f}')
+# Evaluate the model
+val_loss, val_acc = model.evaluate(val_dataset)
+print(f"Validation Accuracy: {val_acc:.2f}")
 
-    filter = newFilter()
-    index = len(array) - 2
-    array.insert(index, filter)
+model.save("tom_and_jerry_classifier.h5")
 
+def predict_image(img_path, model):
+    img = tf.keras.preprocessing.image.load_img(img_path, target_size=(64, 64))
+    img_array = tf.keras.preprocessing.image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
+    img_array /= 255.0  # Normalize
 
-    break
+    prediction = model.predict(img_array)
+    predicted_class = np.argmax(prediction)  # Get index of max probability
 
+    class_names = ["Tom", "Jerry", "Class3", "Class4"]  # Update with your class names
+    return class_names[predicted_class]  # Return the predicted class label
 
-# Plot training history
-plt.plot(history.history['accuracy'], label='Accuracy')
-plt.plot(history.history['val_accuracy'], label = 'Val Accuracy')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
-plt.ylim([0, 1])
-plt.legend(loc='lower right')
-plt.show()
+model = keras.models.load_model("tom_and_jerry_classifier.h5")
+print(predict_image("test_image.jpg", model))
+
