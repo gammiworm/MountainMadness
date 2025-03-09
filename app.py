@@ -50,6 +50,8 @@ val_dataset = tf.keras.preprocessing.image_dataset_from_directory(
     seed=123
 )
 #val_dataset = train_dataset.skip(train_batches)
+normalization_layer = tf.keras.layers.Rescaling(1./255)
+val_dataset = val_dataset.map(lambda x, y: (normalization_layer(x), y))
 
 
 # Get total number of batches
